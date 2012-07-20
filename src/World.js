@@ -50,12 +50,11 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Handle parameters  
   options  = tQuery.extend(options, {
-    cameraControls: true,
+    cameraControls: false,
     cursor:         true,
     controlClass:   ThreeBox.OrbitControls,
     elementResize:  true,
     fullscreen:     true,
-    scaleFactor:    1,
     screenshot:     true,
     stats:          true//,
   });
@@ -102,9 +101,13 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Track element / window resizes.
   if (options.elementResize) {
-    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options.scaleFactor)
-                        // Forward resize events to world.
+    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element)
                         .on('resize', function (width, height) {
+                          // Update tQuery world dimensions.
+                          this._opts.renderW = width;
+                          this._opts.renderH = height;
+
+                          // Forward resize events to world.
                           this.emit('resize', width, height);
                         }.bind(this));
   }
@@ -121,7 +124,7 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Allow 'f' to go fullscreen where this feature is supported.
   if (options.fullscreen && THREEx.FullScreen.available()) {
-    ctx.fullscreen  = THREEx.FullScreen.bindKey();
+    ctx.fullscreen = THREEx.FullScreen.bindKey();
   }
 
   // Bind 'destroy' event on tQuery.world.
@@ -135,9 +138,8 @@ tQuery.World.register('addThreeBox', function (element, options) {
 });
 
 tQuery.World.register('hasThreeBox', function () {
-  // get the context
+  // Get threeBox context.
   var ctx  = tQuery.data(this, "_threeBoxContext")
-  // return true if ctx if defined, false otherwise
   return ctx === undefined ? false : true;
 });
 

@@ -9,6 +9,7 @@ src/Preload.js
 "
 
 VENDOR="
+vendor/microevent.js
 vendor/microajax.js
 "
 

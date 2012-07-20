@@ -20,23 +20,26 @@ var π = Math.PI,
 window.ThreeBox = {};
 
 // Shortcut static call.
-window.threeBox = function (element, worldOptions, boxOptions) {
+window.threeBox = function (element, options) {
   // Omit element (use body)
   if (element && !(element instanceof Node)) {
-    boxOptions = worldOptions;
-    worldOptions = boxOptions;
+    options = element;
     element = null;
   }
 
-  return tQuery.createWorld(worldOptions).threeBox(element, boxOptions);
+  return tQuery.createWorld(options).threeBox(element, options);
 };
 
-// Make microevent methods nicer.
-if (tQuery.MicroeventMixin) {
-  ThreeBox.MicroeventMixin = function (obj) {
-    obj = obj.prototype;
-    tQuery.MicroeventMixin(obj);
-    obj.on = obj.addEventListener;
-    obj.emit = obj.dispatchEvent;
-  }
+// Make microevent methods chainable.
+MicroEvent.prototype.on   = function () { MicroEvent.prototype.bind.apply(this, arguments);    return this; }
+MicroEvent.prototype.emit = function () { MicroEvent.prototype.trigger.apply(this, arguments); return this; }
+MicroEvent.mixin	= function(destObject){
+	var props	= ['bind', 'unbind', 'trigger', 'on', 'emit'];
+	for(var i = 0; i < props.length; i ++){
+		destObject.prototype[props[i]]	= MicroEvent.prototype[props[i]];
+	}
 }
+
+// Make world microevents nicer.
+tQuery.World.prototype.on = tQuery.World.prototype.addEventListener;
+tQuery.World.prototype.emit = tQuery.World.prototype.dispatchEvent;

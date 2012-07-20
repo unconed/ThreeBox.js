@@ -84,8 +84,8 @@ ThreeBox.OrbitControls.prototype = {
 
 };
 
-ThreeBox.MicroeventMixin(ThreeBox.OrbitControls);
-
 ThreeBox.OrbitControls.bind  = function (camera, domElement, options) {
   return new ThreeBox.OrbitControls(camera, domElement, options);
 }
+
+MicroEvent.mixin(ThreeBox.OrbitControls);

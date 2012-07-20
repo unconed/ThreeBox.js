@@ -20,36 +20,33 @@ Usage
 
 Create a tQuery world and call the threeBox method. You may use a shorthand syntax.
 ```
-var worldOptions = { /*...*/ }; // tQuery World options
-var boxOptions = { /*...*/ };   // ThreeBox options (see below)
+var options = { /* .. */ };     // Combined options object
 
 // Fill the entire body.
-var world = tQuery.createWorld(worldOptions).threeBox(boxOptions);
+var world = tQuery.createWorld(options).threeBox(options);
 
 // or shorthand:
-var world = threeBox(worldOptions, boxOptions);
+var world = threeBox(options);
 
 // Fill a particular DOM element.
-var world = tQuery.createWorld(worldOptions).threeBox(element, boxOptions);
+var world = tQuery.createWorld(options).threeBox(element, options);
 
 // or shorthand:
-var world = threeBox(element, worldOptions, boxOptions);
+var world = threeBox(element, options);
 ```
 
-All arguments are optional. The following `boxOptions` are available:
+All arguments are optional. The following `options` are available for ThreeBox in addition to the normal tQuery world options:
 
 * cameraControls: true
   Whether to allow mouse control of the camera.
 * cursor: true
-  Whether to show the mouse cursor when hovering over the scene. Set to false to auto-hide.
+  Whether to show the mouse cursor. When set to false, the cursor auto-hides after a short delay.
 * elementResize:  true,
   Whether to track resizing of the containing element.
 * controlClass:   ThreeBox.OrbitControls
   Override the class to use for mouse controls.
 * fullscreen:     true,
   Enable fullscreen mode with 'f'
-* scaleFactor: 1
-  Render at smaller resolutions than native and scale up. e.g. 2 = half width/height.
 * screenshot:     true,
   Enable screenshot taking with 'p'
 * stats:          true,

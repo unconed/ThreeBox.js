@@ -4,19 +4,14 @@
  * @param {Object} renderer The renderer to update
  * @param {Object} camera The camera to update
  * @param {Object} element The DOM element to size to
- * @param {Number} scaleFactor Scaling factor for the rendering buffer
- *                             (2 = half width/height, 4 = quarter width/height).
  *
  * Based on THREEx.WindowResize.
  */
-ThreeBox.ElementResize  = function (renderer, camera, domElement, scaleFactor) {
-  scaleFactor = scaleFactor || 1;
+ThreeBox.ElementResize = function (renderer, camera, domElement) {
 
-  var callback  = function () {
-    var width = domElement.offsetWidth,
-        height = domElement.offsetHeight,
-        widthS = Math.floor(width / scaleFactor),
-        heightS = Math.floor(height / scaleFactor);
+  var callback = this.callback = function () {
+    var width = Math.floor(domElement.offsetWidth),
+        height = Math.floor(domElement.offsetHeight);
 
     // Size renderer appropriately.
     renderer.domElement.style.position = 'absolute';
@@ -24,7 +19,7 @@ ThreeBox.ElementResize  = function (renderer, camera, domElement, scaleFactor) {
     renderer.domElement.style.height = height + "px";
 
     // Notify the renderer of the size change.
-    renderer.setSize(widthS, heightS);
+    renderer.setSize(width, height);
 
     // Update the camera aspect
     camera.aspect = width / height;
@@ -32,29 +27,26 @@ ThreeBox.ElementResize  = function (renderer, camera, domElement, scaleFactor) {
 
     // Notify of change.
     this.emit('resize', width, height);
-  }
+  }.bind(this);
 
   // Bind the resize event on the window and element.
   window.addEventListener('resize', callback, false);
   domElement.addEventListener('resize', callback, false);
 
   // Update size immediately.
-  callback();
-
-  // Return .unbind() the function to stop watching window resize.
-  return {
-    /**
-     * Stop watching window resize
-     */
-    unbind: function () {
-      window.removeEventListener('resize', callback);
-      domElement.removeEventListener('resize', callback);
-    }
-  };
+  setTimeout(callback, 0);
 }
 
 ThreeBox.ElementResize.bind  = function (renderer, camera, element) {
-  return ThreeBox.ElementResize(renderer, camera, element);
+  return new ThreeBox.ElementResize(renderer, camera, element);
 }
 
-ThreeBox.MicroeventMixin(ThreeBox.ElementResize);
+/**
+ * Stop watching window resize
+ */
+ThreeBox.ElementResize.prototype.unbind = function () {
+  window.removeEventListener('resize', callback);
+  domElement.removeEventListener('resize', callback);
+}
+
+MicroEvent.mixin(ThreeBox.ElementResize);
