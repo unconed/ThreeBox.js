@@ -7,7 +7,8 @@
  *
  * Based on THREEx.WindowResize.
  */
-ThreeBox.ElementResize = function (renderer, camera, domElement) {
+ThreeBox.ElementResize = function (renderer, camera, domElement, scale) {
+  this.scale = scale || 1;
 
   var callback = this.callback = function () {
     var width = Math.floor(domElement.offsetWidth),
@@ -18,15 +19,19 @@ ThreeBox.ElementResize = function (renderer, camera, domElement) {
     renderer.domElement.style.width = width + "px";
     renderer.domElement.style.height = height + "px";
 
+    // Scale
+    var ws = Math.floor(width/this.scale),
+        hs = Math.floor(height/this.scale);
+
     // Notify the renderer of the size change.
-    renderer.setSize(width, height);
+    renderer.setSize(ws, hs);
 
     // Update the camera aspect
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 
     // Notify of change.
-    this.emit('resize', width, height);
+    this.emit('resize', ws, hs);
   }.bind(this);
 
   // Bind the resize event on the window and element.
@@ -37,8 +42,15 @@ ThreeBox.ElementResize = function (renderer, camera, domElement) {
   setTimeout(callback, 0);
 }
 
-ThreeBox.ElementResize.bind  = function (renderer, camera, element) {
-  return new ThreeBox.ElementResize(renderer, camera, element);
+ThreeBox.ElementResize.bind  = function (renderer, camera, element, scale) {
+  return new ThreeBox.ElementResize(renderer, camera, element, scale);
+}
+
+/**
+ * Change resize scale.
+ */
+ThreeBox.ElementResize.prototype.scale = function (scale) {
+  this.scale = scale;
 }
 
 /**

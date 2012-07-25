@@ -56,7 +56,8 @@ tQuery.World.register('addThreeBox', function (element, options) {
     elementResize:  true,
     fullscreen:     true,
     screenshot:     true,
-    stats:          true//,
+    stats:          true,
+    scale:          1//,
   });
 
   // Make tRenderer.domElement style "display: block" - by default it is inline-block
@@ -101,7 +102,7 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Track element / window resizes.
   if (options.elementResize) {
-    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element)
+    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options.scale)
                         .on('resize', function (width, height) {
                           // Update tQuery world dimensions.
                           this._opts.renderW = width;
