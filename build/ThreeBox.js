@@ -1,4 +1,74 @@
 /**
+ * MicroEvent - to make any js object an event emitter (server or browser)
+ * 
+ * - pure javascript - server compatible, browser compatible
+ * - dont rely on the browser doms
+ * - super simple - you get it immediatly, no mistery, no magic involved
+ *
+ * - create a MicroEventDebug with goodies to debug
+ *   - make it safer to use
+*/
+
+var MicroEvent	= function(){}
+MicroEvent.prototype	= {
+	bind	: function(event, fct){
+		this._events = this._events || {};
+		this._events[event] = this._events[event]	|| [];
+		this._events[event].push(fct);
+	},
+	unbind	: function(event, fct){
+		this._events = this._events || {};
+		if( event in this._events === false  )	return;
+		this._events[event].splice(this._events[event].indexOf(fct), 1);
+	},
+	trigger	: function(event /* , args... */){
+		this._events = this._events || {};
+		if( event in this._events === false  )	return;
+		for(var i = 0; i < this._events[event].length; i++){
+			this._events[event][i].apply(this, Array.prototype.slice.call(arguments, 1))
+		}
+	}
+};
+
+/**
+ * mixin will delegate all MicroEvent.js function in the destination object
+ *
+ * - require('MicroEvent').mixin(Foobar) will make Foobar able to use MicroEvent
+ *
+ * @param {Object} the object which will support MicroEvent
+*/
+MicroEvent.mixin	= function(destObject){
+	var props	= ['bind', 'unbind', 'trigger'];
+	for(var i = 0; i < props.length; i ++){
+		destObject.prototype[props[i]]	= MicroEvent.prototype[props[i]];
+	}
+}
+
+// export in common js
+if( typeof module !== "undefined" && ('exports' in module)){
+	module.exports	= MicroEvent
+}/*
+Copyright (c) 2008 Stefan Lange-Hegermann
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+function microAjax(B,A){this.bindFunction=function(E,D){return function(){return E.apply(D,[D])}};this.stateChange=function(D){if(this.request.readyState==4){this.callbackFunction(this.request.responseText)}};this.getRequest=function(){if(window.ActiveXObject){return new ActiveXObject("Microsoft.XMLHTTP")}else{if(window.XMLHttpRequest){return new XMLHttpRequest()}}return false};this.postBody=(arguments[2]||"");this.callbackFunction=A;this.url=B;this.request=this.getRequest();if(this.request){var C=this.request;C.onreadystatechange=this.bindFunction(this.stateChange,this);if(this.postBody!==""){C.open("POST",B,true);C.setRequestHeader("X-Requested-With","XMLHttpRequest");C.setRequestHeader("Content-type","application/x-www-form-urlencoded");C.setRequestHeader("Connection","close")}else{C.open("GET",B,true)}C.send(this.postBody)}};/**
  * ThreeBox.js. More flexible tQuery boilerplate.
  */
 
@@ -20,19 +90,29 @@ var π = Math.PI,
 window.ThreeBox = {};
 
 // Shortcut static call.
-window.threeBox = function (element, worldOptions, boxOptions) {
-  return tQuery.createWorld(worldOptions).threeBox(element, boxOptions);
+window.threeBox = function (element, options) {
+  // Omit element (use body)
+  if (element && !(element instanceof Node)) {
+    options = element;
+    element = null;
+  }
+
+  return tQuery.createWorld(options).threeBox(element, options);
 };
 
-// Make microevent methods nicer.
-if (tQuery.MicroeventMixin) {
-  ThreeBox.MicroeventMixin = function (obj) {
-    obj = obj.prototype;
-    tQuery.MicroeventMixin(obj);
-    obj.on = obj.addEventListener;
-    obj.emit = obj.dispatchEvent;
-  }
+// Make microevent methods chainable.
+MicroEvent.prototype.on   = function () { MicroEvent.prototype.bind.apply(this, arguments);    return this; }
+MicroEvent.prototype.emit = function () { MicroEvent.prototype.trigger.apply(this, arguments); return this; }
+MicroEvent.mixin	= function(destObject){
+	var props	= ['bind', 'unbind', 'trigger', 'on', 'emit'];
+	for(var i = 0; i < props.length; i ++){
+		destObject.prototype[props[i]]	= MicroEvent.prototype[props[i]];
+	}
 }
+
+// Make world microevents nicer.
+tQuery.World.prototype.on = tQuery.World.prototype.addEventListener;
+tQuery.World.prototype.emit = tQuery.World.prototype.dispatchEvent;
 /**
  * World.threeBox() – Create a renderer inside a DOM element.
  *
@@ -40,7 +120,7 @@ if (tQuery.MicroeventMixin) {
  */
 tQuery.World.register('threeBox', function (element, options) {
 
-  // Shorthand, options only.
+  // Shorthand, omit element.
   if (element && !(element instanceof Node)) {
     options = element;
     element = null;
@@ -80,21 +160,19 @@ tQuery.World.register('threeBox', function (element, options) {
  * World.addThreeBox – Set up threebox.
  */
 tQuery.World.register('addThreeBox', function (element, options) {
-  var that  = this;
-
   // Sanity check
   console.assert(this.hasThreeBox() !== true);
 
   // Handle parameters  
   options  = tQuery.extend(options, {
-    cameraControls: true,
+    cameraControls: false,
     cursor:         true,
     controlClass:   ThreeBox.OrbitControls,
     elementResize:  true,
     fullscreen:     true,
-    scaleFactor:    1,
     screenshot:     true,
-    stats:          true//,
+    stats:          true,
+    scale:          1//,
   });
 
   // Make tRenderer.domElement style "display: block" - by default it is inline-block
@@ -139,7 +217,15 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Track element / window resizes.
   if (options.elementResize) {
-    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options.scaleFactor);
+    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options.scale)
+                        .on('resize', function (width, height) {
+                          // Update tQuery world dimensions.
+                          this._opts.renderW = width;
+                          this._opts.renderH = height;
+
+                          // Forward resize events to world.
+                          this.emit('resize', width, height);
+                        }.bind(this));
   }
 
   // Contextual mouse cursor
@@ -154,12 +240,12 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Allow 'f' to go fullscreen where this feature is supported.
   if (options.fullscreen && THREEx.FullScreen.available()) {
-    ctx.fullscreen  = THREEx.FullScreen.bindKey();
+    ctx.fullscreen = THREEx.FullScreen.bindKey();
   }
 
   // Bind 'destroy' event on tQuery.world.
-  ctx._$onDestroy  = this.bind('destroy', function(){
-    if( this.hasThreeBox() === false )  return;
+  ctx._$onDestroy = this.bind('destroy', function () {
+    if (this.hasThreeBox() === false) return;
     this.removeThreeBox();
   });
 
@@ -167,22 +253,21 @@ tQuery.World.register('addThreeBox', function (element, options) {
   return this;
 });
 
-tQuery.World.register('hasThreeBox', function(){
-  // get the context
+tQuery.World.register('hasThreeBox', function () {
+  // Get threeBox context.
   var ctx  = tQuery.data(this, "_threeBoxContext")
-  // return true if ctx if defined, false otherwise
   return ctx === undefined ? false : true;
 });
 
-tQuery.World.register('removeThreeBox', function(){
-  // get context
+tQuery.World.register('removeThreeBox', function () {
+  // Get threeBox context.
   var ctx  = tQuery.data(this, '_threeBoxContext');
-  // if not present, return now
-  if( ctx === undefined )  return  this;
-  // remove the context from this
+  if (ctx === undefined) return this;
+
+  // Remove the context from the world.
   tQuery.removeData(this, '_threeBoxContext');
 
-  // unbind 'destroy' for tQuery.World
+  // Unbind 'destroy' for tQuery.World
   this.unbind('destroy', this._$onDestroy);
 
   // remove stats.js
@@ -213,56 +298,64 @@ tQuery.World.register('removeThreeBox', function(){
  * @param {Object} renderer The renderer to update
  * @param {Object} camera The camera to update
  * @param {Object} element The DOM element to size to
- * @param {Number} scaleFactor Scaling factor for the rendering buffer
- *                             (2 = half width/height, 4 = quarter width/height).
  *
  * Based on THREEx.WindowResize.
  */
-ThreeBox.ElementResize  = function (renderer, camera, domElement, scaleFactor) {
-  scaleFactor = scaleFactor || 1;
+ThreeBox.ElementResize = function (renderer, camera, domElement, scale) {
+  this.scale = scale || 1;
 
-  var callback  = function () {
-    var width = domElement.offsetWidth,
-        height = domElement.offsetHeight,
-        widthS = Math.floor(width / scaleFactor),
-        heightS = Math.floor(height / scaleFactor);
+  var callback = this.callback = function () {
+    var width = Math.floor(domElement.offsetWidth),
+        height = Math.floor(domElement.offsetHeight);
 
     // Size renderer appropriately.
     renderer.domElement.style.position = 'absolute';
     renderer.domElement.style.width = width + "px";
     renderer.domElement.style.height = height + "px";
 
+    // Scale
+    var ws = Math.floor(width/this.scale),
+        hs = Math.floor(height/this.scale);
+
     // Notify the renderer of the size change.
-    renderer.setSize(widthS, heightS);
+    renderer.setSize(ws, hs);
 
     // Update the camera aspect
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-  }
+
+    // Notify of change.
+    this.emit('resize', ws, hs);
+  }.bind(this);
 
   // Bind the resize event on the window and element.
   window.addEventListener('resize', callback, false);
   domElement.addEventListener('resize', callback, false);
 
   // Update size immediately.
-  callback();
-
-  // Return .unbind() the function to stop watching window resize.
-  return {
-    /**
-     * Stop watching window resize
-     */
-    unbind: function () {
-      window.removeEventListener('resize', callback);
-      domElement.removeEventListener('resize', callback);
-    }
-  };
+  setTimeout(callback, 0);
 }
 
-ThreeBox.ElementResize.bind  = function (renderer, camera, element) {
-  return ThreeBox.ElementResize(renderer, camera, element);
+ThreeBox.ElementResize.bind  = function (renderer, camera, element, scale) {
+  return new ThreeBox.ElementResize(renderer, camera, element, scale);
 }
+
 /**
+ * Change resize scale.
+ */
+ThreeBox.ElementResize.prototype.scale = function (scale) {
+  this.scale = scale;
+}
+
+/**
+ * Stop watching window resize
+ */
+ThreeBox.ElementResize.prototype.unbind = function () {
+  window.removeEventListener('resize', callback);
+  domElement.removeEventListener('resize', callback);
+}
+
+MicroEvent.mixin(ThreeBox.ElementResize);/**
  * Click-and-drag mouse controls with Euler angles, yaw and pitch.
  */
 ThreeBox.OrbitControls = function (camera, domElement, options) {
@@ -271,7 +364,7 @@ ThreeBox.OrbitControls = function (camera, domElement, options) {
 
   this.options = tQuery.extend(options, {
     phi: τ/4,
-    theta: 0,
+    theta: 0.3,
     orbit: 2,
     lookAt: [0, 0, 0],
     speed: 2//,
@@ -348,11 +441,11 @@ ThreeBox.OrbitControls.prototype = {
 
 };
 
-ThreeBox.MicroeventMixin(ThreeBox.OrbitControls);
-
 ThreeBox.OrbitControls.bind  = function (camera, domElement, options) {
   return new ThreeBox.OrbitControls(camera, domElement, options);
 }
+
+MicroEvent.mixin(ThreeBox.OrbitControls);
 /**
  * Set cursor shape and auto-hide with timer.
  * 
@@ -403,4 +496,33 @@ ThreeBox.Cursor = function (element, options) {
 
 ThreeBox.Cursor.bind  = function (element, options) {
   return ThreeBox.Cursor(element, options);
+}
+// Quick'n'dirty loader for additional .html content
+ThreeBox.preload = function (files, callback) {
+  // Only callback passed.
+  if (files instanceof Function) {
+    callback = files;
+    files = [];
+  }
+
+  // Allow single file.
+  files = typeof files == 'string' ? [files] : files;
+
+  // Completion counter
+  var remaining = files.length;
+
+  // Load individual file and add to DOM
+  _.each(files, function (file) {
+    // Load file and insert into DOM.
+    new microAjax(file, function (res) {
+      var div = document.createElement('div');
+      div.innerHTML = res;
+      document.body.appendChild(div);
+
+      // Call callback if done.
+      if (--remaining == 0) {
+        callback();
+      };
+    });
+  });
 }
