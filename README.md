@@ -37,16 +37,18 @@ var world = threeBox(element, options);
 
 All arguments are optional. The following `options` are available for ThreeBox in addition to the normal tQuery world options:
 
-* cameraControls: true
+* cameraControls: true,  
   Whether to allow mouse control of the camera.
-* cursor: true
+* cursor: true,  
   Whether to show the mouse cursor. When set to false, the cursor auto-hides after a short delay.
-* elementResize:  true,
+* elementResize:  true,  
   Whether to track resizing of the containing element.
-* controlClass:   ThreeBox.OrbitControls
+* controlClass:   ThreeBox.OrbitControls,  
   Override the class to use for mouse controls.
-* fullscreen:     true,
+* fullscreen:     true,  
   Enable fullscreen mode with 'f'
+* scale:          1,  
+  Render at scaled resolution, e.g. scale 2 is half the width/height. Fractional values allowed.
 * screenshot:     true,
   Enable screenshot taking with 'p'
 * stats:          true,
