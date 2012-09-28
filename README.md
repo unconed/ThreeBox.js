@@ -39,12 +39,12 @@ All arguments are optional. The following `options` are available for ThreeBox i
 
 * cameraControls: true,  
   Whether to allow mouse control of the camera.
+* controlClass:   ThreeBox.OrbitControls,  
+  Override the class to use for mouse controls.
 * cursor: true,  
   Whether to show the mouse cursor. When set to false, the cursor auto-hides after a short delay.
 * elementResize:  true,  
   Whether to track resizing of the containing element.
-* controlClass:   ThreeBox.OrbitControls,  
-  Override the class to use for mouse controls.
 * fullscreen:     true,  
   Enable fullscreen mode with 'f'
 * scale:          1,  
@@ -53,7 +53,7 @@ All arguments are optional. The following `options` are available for ThreeBox i
   Enable screenshot taking with 'p'
 * stats:          true,
   Show FPS stats in the corner.
-});
+
 
 * * *
 
