@@ -11,7 +11,8 @@ It lets you easily embed Three.js scenes as elements in a web page, rather than 
 * * *
 
 Build:
- * ThreeBox.js: tQuery plug-in
+ * ThreeBox.js: tQuery plug-in + dependencies
+ * ThreeBox-core.js: tQuery plug-in only
 
 Depends on: tQuery (Jerome Etienne et al.), Three.js (Ricardo Cabello et al.)
 
