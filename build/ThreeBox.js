@@ -409,8 +409,8 @@ ThreeBox.OrbitControls = function (camera, domElement, options) {
 ThreeBox.OrbitControls.prototype = {
 
   init: function () {
-    this.width = this.element.offsetWidth,
-    this.height = this.element.offsetHeight;
+    this.width = this.element && this.element.offsetWidth,
+    this.height = this.element && this.element.offsetHeight;
     this.phi = this.options.phi;
     this.theta = this.options.theta;
     this.orbit = this.options.orbit;
@@ -443,15 +443,19 @@ ThreeBox.OrbitControls.prototype = {
       }
     }).bind(this);
 
-    this.element.addEventListener('mousedown', this._mouseDown, false);
-    document.addEventListener('mouseup', this._mouseUp, false);
-    document.addEventListener('mousemove', this._mouseMove, false);
+    if (this.element) {
+      this.element.addEventListener('mousedown', this._mouseDown, false);
+      document.addEventListener('mouseup', this._mouseUp, false);
+      document.addEventListener('mousemove', this._mouseMove, false);
+    }
   },
 
   stop: function () {
-    this.element.removeEventListener('mousedown', this._mouseDown);
-    document.removeEventListener('mouseup', this._mouseUp);
-    document.removeEventListener('mousemove', this._mouseMove);
+    if (this.element) {
+      this.element.removeEventListener('mousedown', this._mouseDown);
+      document.removeEventListener('mouseup', this._mouseUp);
+      document.removeEventListener('mousemove', this._mouseMove);
+    }
   },
 
   moved: function (origin, relative, delta) {
