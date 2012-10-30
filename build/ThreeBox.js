@@ -248,7 +248,7 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Track element / window resizes.
   if (options.elementResize) {
-    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options.scale)
+    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options)
                         .on('resize', function (width, height) {
                           // Update tQuery world dimensions.
                           this._opts.renderW = width;
@@ -332,8 +332,9 @@ tQuery.World.register('removeThreeBox', function () {
  *
  * Based on THREEx.WindowResize.
  */
-ThreeBox.ElementResize = function (renderer, camera, domElement, scale) {
-  this.scale = scale || 1;
+ThreeBox.ElementResize = function (renderer, camera, domElement, options) {
+  this.scale = options.scale || 1;
+  this.orbit = options.orbit;
 
   var callback = this.callback = function () {
     var width = Math.floor(domElement.offsetWidth),
@@ -351,8 +352,12 @@ ThreeBox.ElementResize = function (renderer, camera, domElement, scale) {
     // Notify the renderer of the size change.
     renderer.setSize(ws, hs);
 
-    // Update the camera aspect
+    // Update the camera aspect and ortho extents
     camera.aspect = width / height;
+    camera.top = this.orbit / 2;
+    camera.bottom = -camera.top;
+    camera.left = -camera.top * camera.aspect;
+    camera.right = -camera.bottom * camera.aspect;
     camera.updateProjectionMatrix();
 
     // Notify of change.
@@ -367,8 +372,8 @@ ThreeBox.ElementResize = function (renderer, camera, domElement, scale) {
   setTimeout(callback, 0);
 }
 
-ThreeBox.ElementResize.bind  = function (renderer, camera, element, scale) {
-  return new ThreeBox.ElementResize(renderer, camera, element, scale);
+ThreeBox.ElementResize.bind  = function (renderer, camera, element, options) {
+  return new ThreeBox.ElementResize(renderer, camera, element, options);
 }
 
 /**

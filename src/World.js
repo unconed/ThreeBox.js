@@ -102,7 +102,7 @@ tQuery.World.register('addThreeBox', function (element, options) {
 
   // Track element / window resizes.
   if (options.elementResize) {
-    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options.scale)
+    ctx.elementResize = ThreeBox.ElementResize.bind(tRenderer, tCamera, element, options)
                         .on('resize', function (width, height) {
                           // Update tQuery world dimensions.
                           this._opts.renderW = width;
