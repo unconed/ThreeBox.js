@@ -340,7 +340,7 @@ ThreeBox.OrbitControls.prototype = {
       this.drag = false;
     }).bind(this);
 
-    this._mouseMove = (function () {
+    this._mouseMove = (function (event) {
       if (that.drag) {
         var relative = { x: event.pageX - that.origin.x, y: event.pageY - that.origin.y },
             delta = { x: event.pageX - that.lastHover.x, y: event.pageY - that.lastHover.y };
