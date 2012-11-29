@@ -3,7 +3,7 @@
  *
  * Based on tQuery boilerplate.
  */
-tQuery.World.register('threeBox', function (element, options) {
+tQuery.World.registerInstance('threeBox', function (element, options) {
 
   // Shorthand, omit element.
   if (element && !(element instanceof Node)) {
@@ -44,7 +44,7 @@ tQuery.World.register('threeBox', function (element, options) {
 /**
  * World.addThreeBox – Set up threebox.
  */
-tQuery.World.register('addThreeBox', function (element, options) {
+tQuery.World.registerInstance('addThreeBox', function (element, options) {
   // Sanity check
   console.assert(this.hasThreeBox() !== true);
 
@@ -138,13 +138,13 @@ tQuery.World.register('addThreeBox', function (element, options) {
   return this;
 });
 
-tQuery.World.register('hasThreeBox', function () {
+tQuery.World.registerInstance('hasThreeBox', function () {
   // Get threeBox context.
   var ctx  = tQuery.data(this, "_threeBoxContext")
   return ctx === undefined ? false : true;
 });
 
-tQuery.World.register('removeThreeBox', function () {
+tQuery.World.registerInstance('removeThreeBox', function () {
   // Get threeBox context.
   var ctx  = tQuery.data(this, '_threeBoxContext');
   if (ctx === undefined) return this;

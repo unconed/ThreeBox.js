@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ThreeBox Test</title>
+  <script type="text/javascript" charset="utf-8" src="domready.js"></script>
+  <script type="text/javascript" charset="utf-8" src="tquery-bundle.js"></script>
+  <script type="text/javascript" charset="utf-8" src="../build/ThreeBox.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    DomReady.ready(function () {
+      var options = {
+        cameraControls: true,
+      };
+      var element = document.getElementById('holder');
+
+      var world = window.world = threeBox(element, options).start();
+
+      var object  = tQuery.createTorus().addTo(world);
+    });
+  </script>
+  <style type="text/css" media="screen">
+    #holder {
+      width: 640px;
+      height: 400px;
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>  
+  <div id="holder"></div>
+</body>
+</html>
