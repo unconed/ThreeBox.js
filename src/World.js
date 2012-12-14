@@ -119,12 +119,12 @@ tQuery.World.registerInstance('addThreeBox', function (element, options) {
   }
 
   // Allow 'p' to make screenshot.
-  if (options.screenshot) {
+  if (THREEx && THREEx.Screenshot && options.screenshot) {
     ctx.screenshot = THREEx.Screenshot.bindKey(tRenderer);
   }
 
   // Allow 'f' to go fullscreen where this feature is supported.
-  if (options.fullscreen && THREEx.FullScreen.available()) {
+  if (THREEx && THREEx.FullScreen && options.fullscreen && THREEx.FullScreen.available()) {
     ctx.fullscreen = THREEx.FullScreen.bindKey();
   }
 
