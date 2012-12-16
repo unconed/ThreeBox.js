@@ -20,7 +20,7 @@ Usage
 -----
 
 Create a tQuery world and call the threeBox method. You may use a shorthand syntax.
-```
+```javascript
 var options = { /* .. */ };     // Combined options object
 
 // Fill the entire body.
