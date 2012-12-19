@@ -235,14 +235,15 @@ tQuery.World.registerInstance('addThreeBox', function (element, options) {
   if (options.cameraControls) {
     var loop = this.loop(), render = this.render.bind(this);
 
-    ctx.cameraControls = ThreeBox.OrbitControls
-      .bind(tCamera, element, options)
-      .on('change', function () {
+    ctx.cameraControls = new options.controlClass(tCamera, element, options);
+    if (ctx.cameraControls.on) {
+      ctx.cameraControls.on('change', function () {
         // If not looping, ensure view is updated on interaction.
         if (!loop._timerId) {
           render();
         }
       });
+    }
     this.setCameraControls(ctx.cameraControls);
   }
 
@@ -571,6 +572,7 @@ ThreeBox.preload = function (files, callback) {
         'jpg': l.image,
         'png': l.image,
         'gif': l.image,
+        'mp3': l.audio,
       };
   _.each(exts, function (handler, ext) {
     regexps[ext] = new RegExp('\\.' + ext + '$');
@@ -581,13 +583,16 @@ ThreeBox.preload = function (files, callback) {
     // Use appropriate handler based on extension
     _.each(exts, function (handler, ext) {
       if (file.match(regexps[ext])) {
-        handler(file, ping);
+        var path = file.split(/\//g);
+        var name = path.pop().replace(/\.[A-Za-z0-9]+$/, '');
+
+        handler(file, name, ping);
       }
     });
   });
 };
 
-ThreeBox.preload.html = function (file, callback) {
+ThreeBox.preload.html = function (file, name, callback) {
   new microAjax(file, function (res) {
     var match;
 
@@ -610,9 +615,7 @@ ThreeBox.preload.html = function (file, callback) {
   });
 };
 
-ThreeBox.preload.image = function (file, callback) {
-  var path = file.split(/\//g);
-  var name = path.pop().replace(/\.(jpg|png|gif)$/, '');
+ThreeBox.preload.image = function (file, name, callback) {
   THREE.ImageUtils.loadTexture(file, null, function (texture) {
     var ret = {};
     ret[name] = texture;
@@ -621,3 +624,20 @@ ThreeBox.preload.image = function (file, callback) {
     callback(ret);
   });
 };
+
+ThreeBox.preload.audio = function (file, name, callback) {
+  // Load binary file via AJAX
+  var request = new XMLHttpRequest();
+  request.open("GET", file, true);
+  request.responseType = "arraybuffer";
+
+  request.onload = function () {
+    var ret = {};
+    ret[name] = request.response;
+
+    console.log('Loaded audio ', file);
+    callback(ret);
+  };
+
+  request.send();
+}

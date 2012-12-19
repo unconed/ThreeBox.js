@@ -89,14 +89,15 @@ tQuery.World.registerInstance('addThreeBox', function (element, options) {
   if (options.cameraControls) {
     var loop = this.loop(), render = this.render.bind(this);
 
-    ctx.cameraControls = ThreeBox.OrbitControls
-      .bind(tCamera, element, options)
-      .on('change', function () {
+    ctx.cameraControls = new options.controlClass(tCamera, element, options);
+    if (ctx.cameraControls.on) {
+      ctx.cameraControls.on('change', function () {
         // If not looping, ensure view is updated on interaction.
         if (!loop._timerId) {
           render();
         }
       });
+    }
     this.setCameraControls(ctx.cameraControls);
   }
 
