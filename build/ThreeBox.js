@@ -431,25 +431,28 @@ ThreeBox.OrbitControls.prototype = {
   start: function () {
     var that = this;
 
-    this._mouseDown = (function (event) {
-      this.drag = true;
-      this.lastHover = this.origin = { x: event.pageX, y: event.pageY };
+    this._mouseDown = function (event) {
+      that.width = that.element && that.element.offsetWidth,
+      that.height = that.element && that.element.offsetHeight;
+
+      that.drag = true;
+      that.lastHover = that.origin = { x: event.pageX, y: event.pageY };
 
       event.preventDefault();
-    }).bind(this);
+    };
 
-    this._mouseUp = (function () {
-      this.drag = false;
-    }).bind(this);
+    this._mouseUp = function () {
+      that.drag = false;
+    };
 
-    this._mouseMove = (function (event) {
+    this._mouseMove = function (event) {
       if (that.drag) {
         var relative = { x: event.pageX - that.origin.x, y: event.pageY - that.origin.y },
             delta = { x: event.pageX - that.lastHover.x, y: event.pageY - that.lastHover.y };
         that.lastHover = { x: event.pageX, y: event.pageY };
         that.moved(that.origin, relative, delta);
       }
-    }).bind(this);
+    };
 
     if (this.element) {
       this.element.addEventListener('mousedown', this._mouseDown, false);
