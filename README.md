@@ -1,3 +1,6 @@
+Note: This project has been abandoned and rewritten into [threestrap](https://github.com/unconed/threestrap), which doesn't use tQuery.
+---
+
 ThreeBox.js
 ==========
 
