@@ -9,7 +9,6 @@
  */
 ThreeBox.ElementResize = function (renderer, camera, domElement, options) {
   this.scale = options.scale || 1;
-  this.orbit = options.orbit;
 
   var callback = this.callback = function () {
     var width = Math.floor(domElement.offsetWidth),
@@ -30,10 +29,10 @@ ThreeBox.ElementResize = function (renderer, camera, domElement, options) {
     // Update the camera aspect and ortho extents
     camera.aspect = width / height;
     if (camera instanceof THREE.OrthographicCamera) {
-      camera.top = this.orbit / 2;
-      camera.bottom = -camera.top;
-      camera.left = -camera.top * camera.aspect;
-      camera.right = -camera.bottom * camera.aspect;
+      var dy = (camera.top - camera.bottom) / 2;
+      var cx = (camera.left + camera.right) / 2;
+      camera.left  = cx - dy * camera.aspect;
+      camera.right = cx + dy * camera.aspect;
     }
     camera.updateProjectionMatrix();
 

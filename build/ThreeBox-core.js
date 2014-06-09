@@ -234,7 +234,6 @@ tQuery.World.registerInstance('removeThreeBox', function () {
  */
 ThreeBox.ElementResize = function (renderer, camera, domElement, options) {
   this.scale = options.scale || 1;
-  this.orbit = options.orbit;
 
   var callback = this.callback = function () {
     var width = Math.floor(domElement.offsetWidth),
@@ -255,10 +254,10 @@ ThreeBox.ElementResize = function (renderer, camera, domElement, options) {
     // Update the camera aspect and ortho extents
     camera.aspect = width / height;
     if (camera instanceof THREE.OrthographicCamera) {
-      camera.top = this.orbit / 2;
-      camera.bottom = -camera.top;
-      camera.left = -camera.top * camera.aspect;
-      camera.right = -camera.bottom * camera.aspect;
+      var dy = (camera.top - camera.bottom) / 2;
+      var cx = (camera.left + camera.right) / 2;
+      camera.left  = cx - dy * camera.aspect;
+      camera.right = cx + dy * camera.aspect;
     }
     camera.updateProjectionMatrix();
 
@@ -499,14 +498,26 @@ ThreeBox.preload.html = function (file, name, callback) {
     var match;
 
     // Insert javascript directly
-    if (match = res.match(/^<script[^>]*type=['"]text\/javascript['"][^>]*>([\s\S]+?)<\/script>$/m)) {
-      var script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.innerHTML = match[1];
-      document.body.appendChild(script);
+    while (match = res.match(/^(<script\s*>|<script[^>]*type=['"]text\/javascript['"][^>]*>)([\s\S]+?)<\/script>$/m)) {
+      try {
+        /*
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = match[2];
+        document.body.appendChild(script);
+        */
+        eval('(function () {' + match[2] + '})()');
+      }
+      catch (e) {
+        console.error(e);
+        console.error('While evaluating: ' + match[2]);
+      }
+
+      res = res.replace(match[0], '');
     }
+
     // Insert HTML via div
-    else {
+    if (res.replace(/\s*/g) != '') {
       var div = document.createElement('div');
       div.innerHTML = res;
       document.body.appendChild(div);
