@@ -480,7 +480,7 @@ ThreeBox.OrbitControls.prototype = {
     this.camera.position.y = Math.sin(this.theta) * this.orbit;
     this.camera.position.z = Math.sin(this.phi) * Math.cos(this.theta) * this.orbit;
 
-    this.camera.position.addSelf(this.lookAt);
+    this.camera.position.add(this.lookAt);
     this.camera.lookAt(this.lookAt);
   }//,
 
