@@ -58,10 +58,39 @@ ThreeBox.OrbitControls.prototype = {
       }
     };
 
+    this._touchstart = function (event) {
+      that.width = that.element && that.element.offsetWidth,
+      that.height = that.element && that.element.offsetHeight;
+
+      that.drag = true;
+      that.lastHover = that.origin = { x: event.touches[ 0 ].pageX, y: event.touches[ 0 ].pageY };
+
+      event.preventDefault();
+    };
+
+    this._touchmove = function (event) {
+      if (that.drag) {
+        var relative = { x: event.touches[ 0 ].pageX - that.origin.x, y: event.touches[ 0 ].pageY - that.origin.y },
+            delta = { x: event.touches[ 0 ].pageX - that.lastHover.x, y: event.touches[ 0 ].pageY - that.lastHover.y };
+        that.lastHover = { x: event.touches[ 0 ].pageX, y: event.touches[ 0 ].pageY };
+        that.moved(that.origin, relative, delta);
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    this._touchend = function ( /* event */ ) {
+      that.drag = false;
+    };
+
     if (this.element) {
       this.element.addEventListener('mousedown', this._mouseDown, false);
       document.addEventListener('mouseup', this._mouseUp, false);
       document.addEventListener('mousemove', this._mouseMove, false);
+      this.element.addEventListener('touchstart', this._touchstart, false );
+      this.element.addEventListener('touchend', this._touchend, false );
+      this.element.addEventListener('touchmove', this._touchmove, false );
     }
   },
 
@@ -70,6 +99,9 @@ ThreeBox.OrbitControls.prototype = {
       this.element.removeEventListener('mousedown', this._mouseDown);
       document.removeEventListener('mouseup', this._mouseUp);
       document.removeEventListener('mousemove', this._mouseMove);
+      this.element.removeEventListener('touchstart', this._touchstart);
+      this.element.removeEventListener('touchend', this._touchend);
+      this.element.removeEventListener('touchmove', this._touchmove);
     }
   },
 
